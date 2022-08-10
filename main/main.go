@@ -3,7 +3,6 @@ package main
 import "github.com/gin-gonic/gin"
 
 func main() {
-
 	router := gin.Default()
 
 	//  ====== table =====
@@ -17,21 +16,21 @@ func main() {
 
 	deleteTable(router)
 
-	//  ====== index =====
-	//query()
-
-	//scan()
-
 	//  ====== item =====
-	//batchGetItem()
-
-	//batchWriteItem()
-
 	getItem(router)
 
-	//putItem()
+	putItem(router)
 
-	//updateItem()
+	updateItem(router)
+
+	//batchWriteItem(router)
+
+	//batchGetItem(router)
+
+	//  ====== index =====
+	query(router)
+
+	scan(router)
 
 	router.Run("https://localhost:8989")
 }

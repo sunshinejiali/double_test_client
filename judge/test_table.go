@@ -3,7 +3,6 @@ package judge
 import (
 	"context"
 	"double_test_client/log"
-	"encoding/json"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 )
 
@@ -56,14 +55,7 @@ ProvisionedThroughput
 //ItemCount
 //tableArn
 */
-func CreateTable(localCreateTableOutput dynamodb.CreateTableOutput, testCreateTable []byte) {
-	log.Info(context.TODO(), "testCreateTable([]byte):", testCreateTable)
-	// change
-	testCreateTablesOutput := &dynamodb.CreateTableOutput{}
-	if err := json.Unmarshal(testCreateTable, &testCreateTablesOutput); err != nil {
-		log.Info(context.TODO(), "createTableOutputChageError: ", err)
-		panic(err)
-	}
+func CreateTable(localCreateTableOutput, testCreateTablesOutput dynamodb.CreateTableOutput) {
 	localDescributeTable := localCreateTableOutput.TableDescription
 	testDescributetable := testCreateTablesOutput.TableDescription
 	// judge
@@ -104,14 +96,7 @@ func CreateTable(localCreateTableOutput dynamodb.CreateTableOutput, testCreateTa
 	log.Info(context.TODO(), "createTable is successful!")
 }
 
-func DeleteTable(localDeleteTableOutput dynamodb.DeleteTableOutput, testDeleteTable []byte) {
-	log.Info(context.TODO(), "testDeleteTable([]byte):", testDeleteTable)
-	// change
-	testDeleteTableOutput := &dynamodb.DeleteTableOutput{}
-	if err := json.Unmarshal(testDeleteTable, &testDeleteTableOutput); err != nil {
-		log.Info(context.TODO(), "deleteTableOutputChageError: ", err)
-		panic(err)
-	}
+func DeleteTable(localDeleteTableOutput, testDeleteTableOutput dynamodb.DeleteTableOutput) {
 	localDescributeTable := localDeleteTableOutput.TableDescription
 	testDescributetable := testDeleteTableOutput.TableDescription
 	// judge
@@ -152,14 +137,7 @@ func DeleteTable(localDeleteTableOutput dynamodb.DeleteTableOutput, testDeleteTa
 	log.Info(context.TODO(), "deleteTable is successful!")
 }
 
-func UpdateTable(localUpdateTableOutput dynamodb.UpdateTableOutput, testUpdateTable []byte) {
-	log.Info(context.TODO(), "testUpdateTable([]byte):", testUpdateTable)
-	// change
-	testUpdateTableOutput := &dynamodb.UpdateTableOutput{}
-	if err := json.Unmarshal(testUpdateTable, &testUpdateTableOutput); err != nil {
-		log.Info(context.TODO(), "updateTableOutputChageError: ", err)
-		panic(err)
-	}
+func UpdateTable(localUpdateTableOutput, testUpdateTableOutput dynamodb.UpdateTableOutput) {
 	localDescributeTable := localUpdateTableOutput.TableDescription
 	testDescributetable := testUpdateTableOutput.TableDescription
 	// judge
@@ -200,14 +178,7 @@ func UpdateTable(localUpdateTableOutput dynamodb.UpdateTableOutput, testUpdateTa
 	log.Info(context.TODO(), "updateTable is successful!")
 }
 
-func DescribeTable(localDescribeTableOutput dynamodb.DescribeTableOutput, testDescribeTable []byte) {
-	log.Info(context.TODO(), "testDescribeTable([]byte):", testDescribeTable)
-	// change
-	testDescribeTableOutput := &dynamodb.DescribeTableOutput{}
-	if err := json.Unmarshal(testDescribeTable, &testDescribeTableOutput); err != nil {
-		log.Info(context.TODO(), "describeTableOutputChageError: ", err)
-		panic(err)
-	}
+func DescribeTable(localDescribeTableOutput, testDescribeTableOutput dynamodb.DescribeTableOutput) {
 	localDescributeTable := localDescribeTableOutput.Table
 	testDescributetable := testDescribeTableOutput.Table
 	// judge
@@ -254,14 +225,7 @@ ListTables
 	tableNames
 	lastEvaluatedTableName
 */
-func ListTables(localListTablesOutput dynamodb.ListTablesOutput, testListTables []byte) {
-	log.Info(context.TODO(), "testListTables([]byte):", testListTables)
-	// change
-	testListTablesOutput := &dynamodb.ListTablesOutput{}
-	if err := json.Unmarshal(testListTables, &testListTablesOutput); err != nil {
-		log.Info(context.TODO(), "listTablesOutputChageError: ", err)
-		panic(err)
-	}
+func ListTables(localListTablesOutput, testListTablesOutput dynamodb.ListTablesOutput) {
 	// judge
 	if localListTablesOutput.LastEvaluatedTableName != testListTablesOutput.LastEvaluatedTableName {
 		panic("judgeListTables test is fail: LastEvaluatedTableName is different.")

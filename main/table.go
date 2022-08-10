@@ -1,16 +1,12 @@
 package main
 
 import (
-	"encoding/json"
+	"double_test_client/judge"
+	"double_test_client/utils"
 	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/gin-gonic/gin"
-	"net/http"
-	"strings"
-
-	"double_test_client/judge"
-	"double_test_client/utils"
 )
 
 /*
@@ -166,32 +162,20 @@ func createtable(router *gin.Engine) {
 	}
 
 	//  ===== test local dynamodb =====
-	svc := utils.GetConnection()
+	svc := utils.GetLocalConnection()
 	localCreateTableOutput, err := svc.CreateTable(input)
 	if err != nil {
 		panic(err)
 	}
 
 	// ===== test dynamodb on tikv =====
-	router.GET("/createTables", func(context *gin.Context) {
-		marInput, _ := json.Marshal(input)
-		var body = strings.NewReader(string(marInput))
-		response, err := http.Post("https://localhost:8989", "application/x-amz-json-1.0", body)
-		if err != nil || response.StatusCode != http.StatusOK {
-			context.Status(http.StatusServiceUnavailable)
-			panic(err)
-		}
-		reader := response.Body
-		// TODO: extral attributes in header.
-		//contentLength := response.ContentLength
-		//contentType := response.Header.Get("Content-Type")
-		//extraHeaders := map[string]string{
-		//
-		//}
-		//context.DataFromReader(http.StatusOK, contentLength, contentType, reader, extraHeaders)
+	sti := utils.GetTestConnection()
+	testCreateTableOutupt, err := sti.CreateTable(input)
+	if err != nil {
+		panic(err)
+	}
 
-		judge.CreateTable(*localCreateTableOutput, utils.IoReaderChangeBytes(reader))
-	})
+	judge.CreateTable(*localCreateTableOutput, *testCreateTableOutupt)
 }
 
 /*
@@ -249,32 +233,19 @@ func deleteTable(router *gin.Engine) {
 	}
 
 	//  ===== test local dynamodb =====
-	svc := utils.GetConnection()
+	svc := utils.GetLocalConnection()
 	localDeleteTableOutput, err := svc.DeleteTable(input)
 	if err != nil {
 		panic(err)
 	}
 
 	// ===== test dynamodb on tikv =====
-	router.GET("/deleteTables", func(context *gin.Context) {
-		marInput, _ := json.Marshal(input)
-		var body = strings.NewReader(string(marInput))
-		response, err := http.Post("https://localhost:8989", "application/x-amz-json-1.0", body)
-		if err != nil || response.StatusCode != http.StatusOK {
-			context.Status(http.StatusServiceUnavailable)
-			panic(err)
-		}
-		reader := response.Body
-		// TODO: extral attributes in header.
-		//contentLength := response.ContentLength
-		//contentType := response.Header.Get("Content-Type")
-		//extraHeaders := map[string]string{
-		//
-		//}
-		//context.DataFromReader(http.StatusOK, contentLength, contentType, reader, extraHeaders)
-
-		judge.DeleteTable(*localDeleteTableOutput, utils.IoReaderChangeBytes(reader))
-	})
+	sti := utils.GetTestConnection()
+	testDeleteTableOutput, err := sti.DeleteTable(input)
+	if err != nil {
+		panic(err)
+	}
+	judge.DeleteTable(*localDeleteTableOutput, *testDeleteTableOutput)
 }
 
 /*
@@ -344,32 +315,19 @@ func updateTable(router *gin.Engine) {
 	}
 
 	//  ===== test local dynamodb =====
-	svc := utils.GetConnection()
+	svc := utils.GetLocalConnection()
 	localUpdateTableOutput, err := svc.UpdateTable(input)
 	if err != nil {
 		panic(err)
 	}
 
 	// ===== test dynamodb on tikv =====
-	router.GET("/updateTable", func(context *gin.Context) {
-		marInput, _ := json.Marshal(input)
-		var body = strings.NewReader(string(marInput))
-		response, err := http.Post("https://localhost:8989", "application/x-amz-json-1.0", body)
-		if err != nil || response.StatusCode != http.StatusOK {
-			context.Status(http.StatusServiceUnavailable)
-			panic(err)
-		}
-		reader := response.Body
-		// TODO: extral attributes in header.
-		//contentLength := response.ContentLength
-		//contentType := response.Header.Get("Content-Type")
-		//extraHeaders := map[string]string{
-		//
-		//}
-		//context.DataFromReader(http.StatusOK, contentLength, contentType, reader, extraHeaders)
-
-		judge.UpdateTable(*localUpdateTableOutput, utils.IoReaderChangeBytes(reader))
-	})
+	sti := utils.GetTestConnection()
+	testUpdateTableOutput, err := sti.UpdateTable(input)
+	if err != nil {
+		panic(err)
+	}
+	judge.UpdateTable(*localUpdateTableOutput, *testUpdateTableOutput)
 }
 
 /*
@@ -427,32 +385,19 @@ func describeTable(router *gin.Engine) {
 	}
 
 	//  ===== test local dynamodb =====
-	svc := utils.GetConnection()
+	svc := utils.GetLocalConnection()
 	localDescribeTableOutput, err := svc.DescribeTable(input)
 	if err != nil {
 		panic(err)
 	}
 
 	// ===== test dynamodb on tikv =====
-	router.GET("/describeTable", func(context *gin.Context) {
-		marInput, _ := json.Marshal(input)
-		var body = strings.NewReader(string(marInput))
-		response, err := http.Post("https://localhost:8989", "application/x-amz-json-1.0", body)
-		if err != nil || response.StatusCode != http.StatusOK {
-			context.Status(http.StatusServiceUnavailable)
-			panic(err)
-		}
-		reader := response.Body
-		// TODO: extral attributes in header.
-		//contentLength := response.ContentLength
-		//contentType := response.Header.Get("Content-Type")
-		//extraHeaders := map[string]string{
-		//
-		//}
-		//context.DataFromReader(http.StatusOK, contentLength, contentType, reader, extraHeaders)
-
-		judge.DescribeTable(*localDescribeTableOutput, utils.IoReaderChangeBytes(reader))
-	})
+	sti := utils.GetTestConnection()
+	testDescribeTableOutput, err := sti.DescribeTable(input)
+	if err != nil {
+		panic(err)
+	}
+	judge.DescribeTable(*localDescribeTableOutput, *testDescribeTableOutput)
 }
 
 /*
@@ -491,30 +436,17 @@ func listTables(router *gin.Engine) {
 	}
 
 	//  ===== test local dynamodb =====
-	svc := utils.GetConnection()
+	svc := utils.GetLocalConnection()
 	localListTablesOutput, err := svc.ListTables(input)
 	if err != nil {
 		panic(err)
 	}
 
 	// ===== test dynamodb on tikv =====
-	router.GET("/listTables", func(context *gin.Context) {
-		marInput, _ := json.Marshal(input)
-		var body = strings.NewReader(string(marInput))
-		response, err := http.Post("https://localhost:8989", "application/x-amz-json-1.0", body)
-		if err != nil || response.StatusCode != http.StatusOK {
-			context.Status(http.StatusServiceUnavailable)
-			panic(err)
-		}
-		reader := response.Body
-		// TODO: extral attributes in header.
-		//contentLength := response.ContentLength
-		//contentType := response.Header.Get("Content-Type")
-		//extraHeaders := map[string]string{
-		//	//
-		//}
-		//context.DataFromReader(http.StatusOK, contentLength, contentType, reader, extraHeaders)
-
-		judge.ListTables(*localListTablesOutput, utils.IoReaderChangeBytes(reader))
-	})
+	sti := utils.GetTestConnection()
+	testlistTablesOutput, err := sti.ListTables(input)
+	if err != nil {
+		panic(err)
+	}
+	judge.ListTables(*localListTablesOutput, *testlistTablesOutput)
 }
