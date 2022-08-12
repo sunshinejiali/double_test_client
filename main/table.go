@@ -1,7 +1,9 @@
 package main
 
 import (
+	"context"
 	"double_test_client/judge"
+	"double_test_client/log"
 	"double_test_client/utils"
 	"fmt"
 	"github.com/aws/aws-sdk-go/aws"
@@ -75,7 +77,7 @@ func createtable(router *gin.Engine) {
 	)
 
 	// add the value
-	tableName = "Music"
+	tableName = "Music1"
 	attributeDefinitions = []*dynamodb.AttributeDefinition{
 		{
 			AttributeName: aws.String("SongTitle"),
@@ -84,22 +86,6 @@ func createtable(router *gin.Engine) {
 		{
 			AttributeName: aws.String("Artist"),
 			AttributeType: aws.String("S"),
-		},
-		{
-			AttributeName: aws.String("AlbumTitle"),
-			AttributeType: aws.String("S"),
-		},
-		{
-			AttributeName: aws.String("Price"),
-			AttributeType: aws.String("N"),
-		},
-		{
-			AttributeName: aws.String("Genre"),
-			AttributeType: aws.String("S"),
-		},
-		{
-			AttributeName: aws.String("Year"),
-			AttributeType: aws.String("N"),
 		},
 	}
 	keySchema = []*dynamodb.KeySchemaElement{
@@ -167,6 +153,8 @@ func createtable(router *gin.Engine) {
 	if err != nil {
 		panic(err)
 	}
+	log.Info(context.TODO(), localCreateTableOutput)
+	log.Info(context.TODO(), "The local create table test is finished")
 
 	// ===== test dynamodb on tikv =====
 	sti := utils.GetTestConnection()
@@ -174,6 +162,8 @@ func createtable(router *gin.Engine) {
 	if err != nil {
 		panic(err)
 	}
+	log.Info(context.TODO(), testCreateTableOutupt)
+	log.Info(context.TODO(), "The server create table test is finished")
 
 	judge.CreateTable(*localCreateTableOutput, *testCreateTableOutupt)
 }
@@ -391,12 +381,19 @@ func describeTable(router *gin.Engine) {
 		panic(err)
 	}
 
+	log.Info(context.TODO(), localDescribeTableOutput)
+	log.Info(context.TODO(), "The local describe table test is finished")
+
 	// ===== test dynamodb on tikv =====
 	sti := utils.GetTestConnection()
 	testDescribeTableOutput, err := sti.DescribeTable(input)
 	if err != nil {
 		panic(err)
 	}
+
+	log.Info(context.TODO(), testDescribeTableOutput)
+	log.Info(context.TODO(), "The server describute table test is finished")
+
 	judge.DescribeTable(*localDescribeTableOutput, *testDescribeTableOutput)
 }
 
@@ -442,11 +439,18 @@ func listTables(router *gin.Engine) {
 		panic(err)
 	}
 
+	log.Info(context.TODO(), localListTablesOutput)
+	log.Info(context.TODO(), "The local list tables test is finished")
+
 	// ===== test dynamodb on tikv =====
 	sti := utils.GetTestConnection()
 	testlistTablesOutput, err := sti.ListTables(input)
 	if err != nil {
 		panic(err)
 	}
+
+	log.Info(context.TODO(), testlistTablesOutput)
+	log.Info(context.TODO(), "The server list tables test is finished")
+
 	judge.ListTables(*localListTablesOutput, *testlistTablesOutput)
 }
