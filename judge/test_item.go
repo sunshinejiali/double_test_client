@@ -3,7 +3,9 @@ package judge
 import (
 	"context"
 	"double_test_client/log"
+	"double_test_client/utils"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"sort"
 )
 
 func GetItem(localGetItemOutput, testGetItemOutput dynamodb.GetItemOutput) {
@@ -12,11 +14,16 @@ func GetItem(localGetItemOutput, testGetItemOutput dynamodb.GetItemOutput) {
 	//	panic("judgeGetItem test is fail: ConsumedCapacity is different.")
 	//}
 	if len(localGetItemOutput.Item) != len(testGetItemOutput.Item) {
-		panic("The size of Item is different.")
+		panic("The size of Attributes is different.")
 	}
-	for index, name := range localGetItemOutput.Item {
-		if name != testGetItemOutput.Item[index] {
-			panic("The Item is different.")
+	sortItem := make([]string, 0)
+	for k := range localGetItemOutput.Item {
+		sortItem = append(sortItem, k)
+	}
+	sort.Strings(sortItem)
+	for _, k := range sortItem {
+		if utils.Change(localGetItemOutput.Item[k]) != utils.Change(testGetItemOutput.Item[k]) {
+			panic("The Attributes is different.")
 		}
 	}
 	// result
@@ -35,11 +42,21 @@ func PutItem(localGetItemOutput, testGetItemOutput dynamodb.PutItemOutput) {
 	if len(localGetItemOutput.Attributes) != len(testGetItemOutput.Attributes) {
 		panic("The size of Attributes is different.")
 	}
-	for index, name := range localGetItemOutput.Attributes {
-		if name != testGetItemOutput.Attributes[index] {
+	sortItem := make([]string, 0)
+	for k := range localGetItemOutput.Attributes {
+		sortItem = append(sortItem, k)
+	}
+	sort.Strings(sortItem)
+	for _, k := range sortItem {
+		if utils.Change(localGetItemOutput.Attributes[k]) != utils.Change(testGetItemOutput.Attributes[k]) {
 			panic("The Attributes is different.")
 		}
 	}
+	//for index, name := range localGetItemOutput.Attributes {
+	//	if utils.Change(name) != utils.Change(testGetItemOutput.Attributes[index]) {
+	//		panic("The Attributes is different.")
+	//	}
+	//}
 	// result
 	log.Info(context.TODO(), "putItem is successful!")
 }
@@ -56,8 +73,13 @@ func UpdateItem(localGetItemOutput, testGetItemOutput dynamodb.UpdateItemOutput)
 	if len(localGetItemOutput.Attributes) != len(testGetItemOutput.Attributes) {
 		panic("The size of Attributes is different.")
 	}
-	for index, name := range localGetItemOutput.Attributes {
-		if name != testGetItemOutput.Attributes[index] {
+	sortItem := make([]string, 0)
+	for k := range localGetItemOutput.Attributes {
+		sortItem = append(sortItem, k)
+	}
+	sort.Strings(sortItem)
+	for _, k := range sortItem {
+		if utils.Change(localGetItemOutput.Attributes[k]) != utils.Change(testGetItemOutput.Attributes[k]) {
 			panic("The Attributes is different.")
 		}
 	}

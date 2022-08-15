@@ -77,7 +77,7 @@ func createtable(router *gin.Engine) {
 	)
 
 	// add the value
-	tableName = "Music1"
+	tableName = "Music"
 	attributeDefinitions = []*dynamodb.AttributeDefinition{
 		{
 			AttributeName: aws.String("SongTitle"),
@@ -229,13 +229,21 @@ func deleteTable(router *gin.Engine) {
 		panic(err)
 	}
 
+	log.Info(context.TODO(), localDeleteTableOutput)
+	log.Info(context.TODO(), "The local delete table test is finished")
+
 	// ===== test dynamodb on tikv =====
 	sti := utils.GetTestConnection()
 	testDeleteTableOutput, err := sti.DeleteTable(input)
 	if err != nil {
 		panic(err)
 	}
+
+	log.Info(context.TODO(), testDeleteTableOutput)
+	log.Info(context.TODO(), "The server delete table test is finished")
+
 	judge.DeleteTable(*localDeleteTableOutput, *testDeleteTableOutput)
+
 }
 
 /*
@@ -296,7 +304,7 @@ func updateTable(router *gin.Engine) {
 	tableName = "Music"
 	provisionedThroughput = dynamodb.ProvisionedThroughput{
 		ReadCapacityUnits:  aws.Int64(5),
-		WriteCapacityUnits: aws.Int64(5),
+		WriteCapacityUnits: aws.Int64(10),
 	}
 	// TODO: update all values
 	input = &dynamodb.UpdateTableInput{
@@ -311,12 +319,19 @@ func updateTable(router *gin.Engine) {
 		panic(err)
 	}
 
+	log.Info(context.TODO(), localUpdateTableOutput)
+	log.Info(context.TODO(), "The local update table test is finished")
+
 	// ===== test dynamodb on tikv =====
 	sti := utils.GetTestConnection()
 	testUpdateTableOutput, err := sti.UpdateTable(input)
 	if err != nil {
 		panic(err)
 	}
+
+	log.Info(context.TODO(), testUpdateTableOutput)
+	log.Info(context.TODO(), "The server update table test is finished")
+
 	judge.UpdateTable(*localUpdateTableOutput, *testUpdateTableOutput)
 }
 
@@ -426,7 +441,7 @@ func listTables(router *gin.Engine) {
 	)
 	// add the value
 	exclusiveStartTableName = "Music"
-	limit = 1
+	limit = 10
 	input = &dynamodb.ListTablesInput{
 		ExclusiveStartTableName: &exclusiveStartTableName,
 		Limit:                   &limit,

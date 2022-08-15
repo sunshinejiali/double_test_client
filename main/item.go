@@ -1,7 +1,9 @@
 package main
 
 import (
+	"context"
 	"double_test_client/judge"
+	"double_test_client/log"
 	"double_test_client/utils"
 	"fmt"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
@@ -103,6 +105,7 @@ func getItem(router *gin.Engine) {
 	)
 	// add the value
 	// TODO: add all values
+	key = make(map[string]*dynamodb.AttributeValue, 0)
 	tableName = "Music"
 	artist = "Acme Band"
 	songTitle = "Happy Day"
@@ -123,6 +126,8 @@ func getItem(router *gin.Engine) {
 	if err != nil {
 		panic(err)
 	}
+	log.Info(context.TODO(), localGetItemOutput)
+	log.Info(context.TODO(), "The local get item test is finished")
 
 	// ===== test dynamodb on tikv =====
 	sti := utils.GetTestConnection()
@@ -130,6 +135,10 @@ func getItem(router *gin.Engine) {
 	if err != nil {
 		panic(err)
 	}
+
+	log.Info(context.TODO(), testGetItemOutput)
+	log.Info(context.TODO(), "The server get item test is finished")
+
 	judge.GetItem(*localGetItemOutput, *testGetItemOutput)
 }
 
@@ -152,6 +161,7 @@ func putItem(router *gin.Engine) {
 		albumTitle string
 		awards     string
 	)
+	item = make(map[string]*dynamodb.AttributeValue, 0)
 	// add the value
 	// TODO: add all values
 	tableName = "Music"
@@ -191,12 +201,19 @@ func putItem(router *gin.Engine) {
 		panic(err)
 	}
 
+	log.Info(context.TODO(), localPutItemOutput)
+	log.Info(context.TODO(), "The local put item test is finished")
+
 	// ===== test dynamodb on tikv =====
 	sti := utils.GetTestConnection()
 	testPutItemOutput, err := sti.PutItem(input)
 	if err != nil {
 		panic(err)
 	}
+
+	log.Info(context.TODO(), testPutItemOutput)
+	log.Info(context.TODO(), "The server put item test is finished")
+
 	judge.PutItem(*localPutItemOutput, *testPutItemOutput)
 }
 
@@ -222,6 +239,8 @@ func updateItem(router *gin.Engine) {
 	)
 	// add the value
 	// TODO: add all values
+	key = make(map[string]*dynamodb.AttributeValue, 0)
+	expressionAttributeValues = make(map[string]*dynamodb.AttributeValue, 0)
 	tableName = "Music"
 	artist = "Acme Band"
 	songTitle = "Happy Day"
@@ -232,7 +251,7 @@ func updateItem(router *gin.Engine) {
 		S: &songTitle,
 	}
 	returnValues = "ALL_NEW"
-	albumTitle = "Updated Album Title"
+	albumTitle = "Updated Album Titles"
 	expressionAttributeValues[":newval"] = &dynamodb.AttributeValue{
 		S: &albumTitle,
 	}
@@ -259,11 +278,17 @@ func updateItem(router *gin.Engine) {
 		panic(err)
 	}
 
+	log.Info(context.TODO(), localUpdateItemOutput)
+	log.Info(context.TODO(), "The local update item test is finished")
+
 	// ===== test dynamodb on tikv =====
 	sti := utils.GetTestConnection()
 	testUpdateItemOutput, err := sti.UpdateItem(input)
 	if err != nil {
 		panic(err)
 	}
+
+	log.Info(context.TODO(), testUpdateItemOutput)
+	log.Info(context.TODO(), "The server update item test is finished")
 	judge.UpdateItem(*localUpdateItemOutput, *testUpdateItemOutput)
 }

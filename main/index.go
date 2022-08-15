@@ -1,7 +1,9 @@
 package main
 
 import (
+	"context"
 	"double_test_client/judge"
+	"double_test_client/log"
 	"double_test_client/utils"
 	"fmt"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
@@ -63,7 +65,9 @@ func query(router *gin.Engine) {
 		artist    string
 	)
 
+	expressionAttributeValues = make(map[string]*dynamodb.AttributeValue, 0)
 	// add the value
+	//flag := true
 	tableName = "Music"
 	artist = "Acme Band"
 	keyConditionExpression = "Artist = :name"
@@ -73,7 +77,7 @@ func query(router *gin.Engine) {
 	input = &dynamodb.QueryInput{
 		//AttributesToGet:           nil,
 		//ConditionalOperator:       nil,
-		//ConsistentRead:            nil,
+		//ConsistentRead: &flag,
 		//ExclusiveStartKey:         nil,
 		//ExpressionAttributeNames:  nil,
 		ExpressionAttributeValues: expressionAttributeValues,
@@ -96,6 +100,8 @@ func query(router *gin.Engine) {
 	if err != nil {
 		panic(err)
 	}
+	log.Info(context.TODO(), localQueryOutput)
+	log.Info(context.TODO(), "The local query item test is finished")
 
 	// ===== test dynamodb on tikv =====
 	sti := utils.GetTestConnection()
@@ -103,6 +109,9 @@ func query(router *gin.Engine) {
 	if err != nil {
 		panic(err)
 	}
+
+	log.Info(context.TODO(), testQueryOutupt)
+	log.Info(context.TODO(), "The server query item test is finished")
 
 	judge.Query(*localQueryOutput, *testQueryOutupt)
 }
@@ -188,12 +197,18 @@ func scan(router *gin.Engine) {
 		panic(err)
 	}
 
+	log.Info(context.TODO(), localScanOutput)
+	log.Info(context.TODO(), "The local scan item test is finished")
+
 	// ===== test dynamodb on tikv =====
 	sti := utils.GetTestConnection()
 	testScanOutupt, err := sti.Scan(input)
 	if err != nil {
 		panic(err)
 	}
+
+	log.Info(context.TODO(), testScanOutupt)
+	log.Info(context.TODO(), "The server scan item test is finished")
 
 	judge.Scan(*localScanOutput, *testScanOutupt)
 }

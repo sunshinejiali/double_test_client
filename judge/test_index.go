@@ -3,7 +3,9 @@ package judge
 import (
 	"context"
 	"double_test_client/log"
+	"double_test_client/utils"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"sort"
 )
 
 func Query(localQueryOutput, testQueryOutput dynamodb.QueryOutput) {
@@ -55,13 +57,17 @@ func Scan(localScanOutput, testScanOutput dynamodb.ScanOutput) {
 		if len(localMap) != len(testMap) {
 			panic("The size of item is different.")
 		}
-		for key, value := range localMap {
-			if value != testMap[key] {
-				panic("The value is different.")
+		sortItem := make([]string, 0)
+		for k := range testMap {
+			sortItem = append(sortItem, k)
+		}
+		sort.Strings(sortItem)
+		for _, k := range sortItem {
+			if utils.Change(testMap[k]) != utils.Change(localMap[k]) {
+				panic("The Attributes is different.")
 			}
 		}
-
 	}
 	// result
-	log.Info(context.TODO(), "query is successful!")
+	log.Info(context.TODO(), "scan is successful!")
 }
