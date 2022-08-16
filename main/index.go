@@ -10,37 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-/*
-	aws dynamodb query \
-	    --table-name Music \
-	    --key-condition-expression "Artist = :name" \
-	    --expression-attribute-values  '{":name":{"S":"Acme Band"}}'  --endpoint-url http://localhost:8000
-
-	{
-	    "Items": [
-	        {
-	            "Artist": {
-	                "S": "Acme Band"
-	            },
-	            "Awards": {
-	                "N": "10"
-	            },
-	            "AlbumTitle": {
-	                "S": "Updated Album Title"
-	            },
-	            "SongTitle": {
-	                "S": "Happy Day"
-	            }
-	        }
-	    ],
-	    "Count": 1,
-	    "ScannedCount": 1,
-	    "ConsumedCapacity": null
-	}
-*/
 func query(router *gin.Engine) {
-	// region
-	// countItem
 	fmt.Println("start test 'query':")
 	// TODO: add value
 	var (
@@ -66,8 +36,6 @@ func query(router *gin.Engine) {
 	)
 
 	expressionAttributeValues = make(map[string]*dynamodb.AttributeValue, 0)
-	// add the value
-	//flag := true
 	tableName = "Music"
 	artist = "Acme Band"
 	keyConditionExpression = "Artist = :name"
@@ -94,15 +62,6 @@ func query(router *gin.Engine) {
 		TableName: &tableName,
 	}
 
-	//  ===== test local dynamodb =====
-	svc := utils.GetLocalConnection()
-	localQueryOutput, err := svc.Query(input)
-	if err != nil {
-		panic(err)
-	}
-	log.Info(context.TODO(), localQueryOutput)
-	log.Info(context.TODO(), "The local query item test is finished")
-
 	// ===== test dynamodb on tikv =====
 	sti := utils.GetTestConnection()
 	testQueryOutupt, err := sti.Query(input)
@@ -113,37 +72,18 @@ func query(router *gin.Engine) {
 	log.Info(context.TODO(), testQueryOutupt)
 	log.Info(context.TODO(), "The server query item test is finished")
 
+	//  ===== test local dynamodb =====
+	svc := utils.GetLocalConnection()
+	localQueryOutput, err := svc.Query(input)
+	if err != nil {
+		panic(err)
+	}
+	log.Info(context.TODO(), localQueryOutput)
+	log.Info(context.TODO(), "The local query item test is finished")
+
 	judge.Query(*localQueryOutput, *testQueryOutupt)
 }
 
-/*
-aws dynamodb scan --table-name Music --return-consumed-capacity Total  --endpoint-url http://localhost:8000
-
-	{
-	    "Items": [
-	        {
-	            "Artist": {
-	                "S": "Acme Band"
-	            },
-	            "Awards": {
-	                "N": "10"
-	            },
-	            "AlbumTitle": {
-	                "S": "Updated Album Title"
-	            },
-	            "SongTitle": {
-	                "S": "Happy Day"
-	            }
-	        }
-	    ],
-	    "Count": 1,
-	    "ScannedCount": 1,
-	    "ConsumedCapacity": {
-	        "TableName": "Music",
-	        "CapacityUnits": 0.5
-	    }
-	}
-*/
 func scan(router *gin.Engine) {
 	fmt.Println("start test 'scan':")
 	// TODO: add value
@@ -168,7 +108,6 @@ func scan(router *gin.Engine) {
 		//totalSegment              *int64
 	)
 
-	// add the value
 	tableName = "Music"
 	returnConsumedCapacity = "Total"
 	input = &dynamodb.ScanInput{
@@ -190,16 +129,6 @@ func scan(router *gin.Engine) {
 		//TotalSegments:             nil,
 	}
 
-	//  ===== test local dynamodb =====
-	svc := utils.GetLocalConnection()
-	localScanOutput, err := svc.Scan(input)
-	if err != nil {
-		panic(err)
-	}
-
-	log.Info(context.TODO(), localScanOutput)
-	log.Info(context.TODO(), "The local scan item test is finished")
-
 	// ===== test dynamodb on tikv =====
 	sti := utils.GetTestConnection()
 	testScanOutupt, err := sti.Scan(input)
@@ -209,6 +138,16 @@ func scan(router *gin.Engine) {
 
 	log.Info(context.TODO(), testScanOutupt)
 	log.Info(context.TODO(), "The server scan item test is finished")
+
+	//  ===== test local dynamodb =====
+	svc := utils.GetLocalConnection()
+	localScanOutput, err := svc.Scan(input)
+	if err != nil {
+		panic(err)
+	}
+
+	log.Info(context.TODO(), localScanOutput)
+	log.Info(context.TODO(), "The local scan item test is finished")
 
 	judge.Scan(*localScanOutput, *testScanOutupt)
 }

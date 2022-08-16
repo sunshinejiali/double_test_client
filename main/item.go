@@ -103,7 +103,6 @@ func getItem(router *gin.Engine) {
 		artist    string
 		songTitle string
 	)
-	// add the value
 	// TODO: add all values
 	key = make(map[string]*dynamodb.AttributeValue, 0)
 	tableName = "Music"
@@ -120,15 +119,6 @@ func getItem(router *gin.Engine) {
 		Key:       key,
 	}
 
-	//  ===== test local dynamodb =====
-	svc := utils.GetLocalConnection()
-	localGetItemOutput, err := svc.GetItem(input)
-	if err != nil {
-		panic(err)
-	}
-	log.Info(context.TODO(), localGetItemOutput)
-	log.Info(context.TODO(), "The local get item test is finished")
-
 	// ===== test dynamodb on tikv =====
 	sti := utils.GetTestConnection()
 	testGetItemOutput, err := sti.GetItem(input)
@@ -138,6 +128,15 @@ func getItem(router *gin.Engine) {
 
 	log.Info(context.TODO(), testGetItemOutput)
 	log.Info(context.TODO(), "The server get item test is finished")
+
+	//  ===== test local dynamodb =====
+	svc := utils.GetLocalConnection()
+	localGetItemOutput, err := svc.GetItem(input)
+	if err != nil {
+		panic(err)
+	}
+	log.Info(context.TODO(), localGetItemOutput)
+	log.Info(context.TODO(), "The local get item test is finished")
 
 	judge.GetItem(*localGetItemOutput, *testGetItemOutput)
 }
@@ -162,7 +161,7 @@ func putItem(router *gin.Engine) {
 		awards     string
 	)
 	item = make(map[string]*dynamodb.AttributeValue, 0)
-	// add the value
+
 	// TODO: add all values
 	tableName = "Music"
 	artist = "Acme Band"
@@ -194,16 +193,6 @@ func putItem(router *gin.Engine) {
 		TableName: &tableName,
 	}
 
-	//  ===== test local dynamodb =====
-	svc := utils.GetLocalConnection()
-	localPutItemOutput, err := svc.PutItem(input)
-	if err != nil {
-		panic(err)
-	}
-
-	log.Info(context.TODO(), localPutItemOutput)
-	log.Info(context.TODO(), "The local put item test is finished")
-
 	// ===== test dynamodb on tikv =====
 	sti := utils.GetTestConnection()
 	testPutItemOutput, err := sti.PutItem(input)
@@ -213,6 +202,16 @@ func putItem(router *gin.Engine) {
 
 	log.Info(context.TODO(), testPutItemOutput)
 	log.Info(context.TODO(), "The server put item test is finished")
+
+	//  ===== test local dynamodb =====
+	svc := utils.GetLocalConnection()
+	localPutItemOutput, err := svc.PutItem(input)
+	if err != nil {
+		panic(err)
+	}
+
+	log.Info(context.TODO(), localPutItemOutput)
+	log.Info(context.TODO(), "The local put item test is finished")
 
 	judge.PutItem(*localPutItemOutput, *testPutItemOutput)
 }
@@ -237,7 +236,7 @@ func updateItem(router *gin.Engine) {
 		songTitle        string
 		albumTitle       string
 	)
-	// add the value
+
 	// TODO: add all values
 	key = make(map[string]*dynamodb.AttributeValue, 0)
 	expressionAttributeValues = make(map[string]*dynamodb.AttributeValue, 0)
@@ -271,6 +270,16 @@ func updateItem(router *gin.Engine) {
 		UpdateExpression: &updateExpression,
 	}
 
+	// ===== test dynamodb on tikv =====
+	sti := utils.GetTestConnection()
+	testUpdateItemOutput, err := sti.UpdateItem(input)
+	if err != nil {
+		panic(err)
+	}
+
+	log.Info(context.TODO(), testUpdateItemOutput)
+	log.Info(context.TODO(), "The server update item test is finished")
+
 	//  ===== test local dynamodb =====
 	svc := utils.GetLocalConnection()
 	localUpdateItemOutput, err := svc.UpdateItem(input)
@@ -281,14 +290,60 @@ func updateItem(router *gin.Engine) {
 	log.Info(context.TODO(), localUpdateItemOutput)
 	log.Info(context.TODO(), "The local update item test is finished")
 
+	judge.UpdateItem(*localUpdateItemOutput, *testUpdateItemOutput)
+}
+
+func deleteItem(router *gin.Engine) {
+	fmt.Println("start test 'deleteItem':")
+	var (
+		input                        *dynamodb.DeleteItemInput
+		key                          map[string]*dynamodb.AttributeValue
+		tableName, artist, songTitle string
+	)
+	key = make(map[string]*dynamodb.AttributeValue, 0)
+
+	// TODO: add all values
+	tableName = "Music"
+	artist = "Acme Band"
+	songTitle = "Happy Day"
+	key["SongTitle"] = &dynamodb.AttributeValue{
+		S: &songTitle,
+	}
+	key["Artist"] = &dynamodb.AttributeValue{
+		S: &artist,
+	}
+	input = &dynamodb.DeleteItemInput{
+		//ConditionExpression:         nil,
+		//ConditionalOperator:         nil,
+		//Expected:                    nil,
+		//ExpressionAttributeNames:    nil,
+		//ExpressionAttributeValues:   nil,
+		Key: key,
+		//ReturnConsumedCapacity:      nil,
+		//ReturnItemCollectionMetrics: nil,
+		//ReturnValues:                nil,
+		TableName: &tableName,
+	}
+
 	// ===== test dynamodb on tikv =====
 	sti := utils.GetTestConnection()
-	testUpdateItemOutput, err := sti.UpdateItem(input)
+	testDeleteItemOutput, err := sti.DeleteItem(input)
 	if err != nil {
 		panic(err)
 	}
 
-	log.Info(context.TODO(), testUpdateItemOutput)
-	log.Info(context.TODO(), "The server update item test is finished")
-	judge.UpdateItem(*localUpdateItemOutput, *testUpdateItemOutput)
+	log.Info(context.TODO(), testDeleteItemOutput)
+	log.Info(context.TODO(), "The server put item test is finished")
+
+	//  ===== test local dynamodb =====
+	svc := utils.GetLocalConnection()
+	localDeleteItemOutput, err := svc.DeleteItem(input)
+	if err != nil {
+		panic(err)
+	}
+
+	log.Info(context.TODO(), localDeleteItemOutput)
+	log.Info(context.TODO(), "The local put item test is finished")
+
+	judge.DeleteItem(*localDeleteItemOutput, *testDeleteItemOutput)
 }

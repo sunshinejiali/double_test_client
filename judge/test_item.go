@@ -26,7 +26,6 @@ func GetItem(localGetItemOutput, testGetItemOutput dynamodb.GetItemOutput) {
 			panic("The Attributes is different.")
 		}
 	}
-	// result
 	log.Info(context.TODO(), "getItem is successful!")
 }
 
@@ -52,12 +51,6 @@ func PutItem(localGetItemOutput, testGetItemOutput dynamodb.PutItemOutput) {
 			panic("The Attributes is different.")
 		}
 	}
-	//for index, name := range localGetItemOutput.Attributes {
-	//	if utils.Change(name) != utils.Change(testGetItemOutput.Attributes[index]) {
-	//		panic("The Attributes is different.")
-	//	}
-	//}
-	// result
 	log.Info(context.TODO(), "putItem is successful!")
 }
 
@@ -83,7 +76,24 @@ func UpdateItem(localGetItemOutput, testGetItemOutput dynamodb.UpdateItemOutput)
 			panic("The Attributes is different.")
 		}
 	}
-	// result
+	log.Info(context.TODO(), "updateItem is successful!")
+}
+
+func DeleteItem(localDeleteItemOutput, testDeleteItemOutput dynamodb.DeleteItemOutput) {
+	//TODO: judge
+	//if localGetItemOutput.ConsumedCapacity != testGetItemOutput.ConsumedCapacity {
+	//	panic("judgeUpdateItem test is fail: ConsumedCapacity is different.")
+	//}
+	// TODO:
+	//if localGetItemOutput.ItemCollectionMetrics != testGetItemOutput.ItemCollectionMetrics {
+	//	panic("judgeUpdateItem test is fail: ItemCollectionMetrics is different.")
+	//}
+	//if len(localDeleteItemOutput.Attributes) != len(testDeleteItemOutput.Attributes) {
+	//	panic("The size of Attributes is different.")
+	//}
+	//if *localDeleteItemOutput.ConsumedCapacity.TableName != *testDeleteItemOutput.ConsumedCapacity.TableName {
+	//	panic("The tableName is different.")
+	//}
 	log.Info(context.TODO(), "updateItem is successful!")
 }
 

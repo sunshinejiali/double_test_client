@@ -147,15 +147,6 @@ func createtable(router *gin.Engine) {
 		TableName: &tableName,
 	}
 
-	//  ===== test local dynamodb =====
-	svc := utils.GetLocalConnection()
-	localCreateTableOutput, err := svc.CreateTable(input)
-	if err != nil {
-		panic(err)
-	}
-	log.Info(context.TODO(), localCreateTableOutput)
-	log.Info(context.TODO(), "The local create table test is finished")
-
 	// ===== test dynamodb on tikv =====
 	sti := utils.GetTestConnection()
 	testCreateTableOutupt, err := sti.CreateTable(input)
@@ -164,6 +155,15 @@ func createtable(router *gin.Engine) {
 	}
 	log.Info(context.TODO(), testCreateTableOutupt)
 	log.Info(context.TODO(), "The server create table test is finished")
+
+	//  ===== test local dynamodb =====
+	svc := utils.GetLocalConnection()
+	localCreateTableOutput, err := svc.CreateTable(input)
+	if err != nil {
+		panic(err)
+	}
+	log.Info(context.TODO(), localCreateTableOutput)
+	log.Info(context.TODO(), "The local create table test is finished")
 
 	judge.CreateTable(*localCreateTableOutput, *testCreateTableOutupt)
 }
@@ -222,16 +222,6 @@ func deleteTable(router *gin.Engine) {
 		TableName: &tableName,
 	}
 
-	//  ===== test local dynamodb =====
-	svc := utils.GetLocalConnection()
-	localDeleteTableOutput, err := svc.DeleteTable(input)
-	if err != nil {
-		panic(err)
-	}
-
-	log.Info(context.TODO(), localDeleteTableOutput)
-	log.Info(context.TODO(), "The local delete table test is finished")
-
 	// ===== test dynamodb on tikv =====
 	sti := utils.GetTestConnection()
 	testDeleteTableOutput, err := sti.DeleteTable(input)
@@ -241,6 +231,16 @@ func deleteTable(router *gin.Engine) {
 
 	log.Info(context.TODO(), testDeleteTableOutput)
 	log.Info(context.TODO(), "The server delete table test is finished")
+
+	//  ===== test local dynamodb =====
+	svc := utils.GetLocalConnection()
+	localDeleteTableOutput, err := svc.DeleteTable(input)
+	if err != nil {
+		panic(err)
+	}
+
+	log.Info(context.TODO(), localDeleteTableOutput)
+	log.Info(context.TODO(), "The local delete table test is finished")
 
 	judge.DeleteTable(*localDeleteTableOutput, *testDeleteTableOutput)
 
@@ -304,23 +304,13 @@ func updateTable(router *gin.Engine) {
 	tableName = "Music"
 	provisionedThroughput = dynamodb.ProvisionedThroughput{
 		ReadCapacityUnits:  aws.Int64(5),
-		WriteCapacityUnits: aws.Int64(10),
+		WriteCapacityUnits: aws.Int64(5),
 	}
 	// TODO: update all values
 	input = &dynamodb.UpdateTableInput{
 		TableName:             &tableName,
 		ProvisionedThroughput: &provisionedThroughput,
 	}
-
-	//  ===== test local dynamodb =====
-	svc := utils.GetLocalConnection()
-	localUpdateTableOutput, err := svc.UpdateTable(input)
-	if err != nil {
-		panic(err)
-	}
-
-	log.Info(context.TODO(), localUpdateTableOutput)
-	log.Info(context.TODO(), "The local update table test is finished")
 
 	// ===== test dynamodb on tikv =====
 	sti := utils.GetTestConnection()
@@ -331,6 +321,16 @@ func updateTable(router *gin.Engine) {
 
 	log.Info(context.TODO(), testUpdateTableOutput)
 	log.Info(context.TODO(), "The server update table test is finished")
+
+	//  ===== test local dynamodb =====
+	svc := utils.GetLocalConnection()
+	localUpdateTableOutput, err := svc.UpdateTable(input)
+	if err != nil {
+		panic(err)
+	}
+
+	log.Info(context.TODO(), localUpdateTableOutput)
+	log.Info(context.TODO(), "The local update table test is finished")
 
 	judge.UpdateTable(*localUpdateTableOutput, *testUpdateTableOutput)
 }
@@ -389,16 +389,6 @@ func describeTable(router *gin.Engine) {
 		TableName: &tableName,
 	}
 
-	//  ===== test local dynamodb =====
-	svc := utils.GetLocalConnection()
-	localDescribeTableOutput, err := svc.DescribeTable(input)
-	if err != nil {
-		panic(err)
-	}
-
-	log.Info(context.TODO(), localDescribeTableOutput)
-	log.Info(context.TODO(), "The local describe table test is finished")
-
 	// ===== test dynamodb on tikv =====
 	sti := utils.GetTestConnection()
 	testDescribeTableOutput, err := sti.DescribeTable(input)
@@ -408,6 +398,16 @@ func describeTable(router *gin.Engine) {
 
 	log.Info(context.TODO(), testDescribeTableOutput)
 	log.Info(context.TODO(), "The server describute table test is finished")
+
+	//  ===== test local dynamodb =====
+	svc := utils.GetLocalConnection()
+	localDescribeTableOutput, err := svc.DescribeTable(input)
+	if err != nil {
+		panic(err)
+	}
+
+	log.Info(context.TODO(), localDescribeTableOutput)
+	log.Info(context.TODO(), "The local describe table test is finished")
 
 	judge.DescribeTable(*localDescribeTableOutput, *testDescribeTableOutput)
 }
@@ -447,16 +447,6 @@ func listTables(router *gin.Engine) {
 		Limit:                   &limit,
 	}
 
-	//  ===== test local dynamodb =====
-	svc := utils.GetLocalConnection()
-	localListTablesOutput, err := svc.ListTables(input)
-	if err != nil {
-		panic(err)
-	}
-
-	log.Info(context.TODO(), localListTablesOutput)
-	log.Info(context.TODO(), "The local list tables test is finished")
-
 	// ===== test dynamodb on tikv =====
 	sti := utils.GetTestConnection()
 	testlistTablesOutput, err := sti.ListTables(input)
@@ -466,6 +456,16 @@ func listTables(router *gin.Engine) {
 
 	log.Info(context.TODO(), testlistTablesOutput)
 	log.Info(context.TODO(), "The server list tables test is finished")
+
+	//  ===== test local dynamodb =====
+	svc := utils.GetLocalConnection()
+	localListTablesOutput, err := svc.ListTables(input)
+	if err != nil {
+		panic(err)
+	}
+
+	log.Info(context.TODO(), localListTablesOutput)
+	log.Info(context.TODO(), "The local list tables test is finished")
 
 	judge.ListTables(*localListTablesOutput, *testlistTablesOutput)
 }
