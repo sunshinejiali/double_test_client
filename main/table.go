@@ -62,8 +62,8 @@ import (
 	    }
 	}
 */
-func createtable(router *gin.Engine) {
-	fmt.Println("start test 'createTable':")
+func createTableTest1(router *gin.Engine) {
+	fmt.Println("start test 'createTableTest1':")
 	var (
 		input                *dynamodb.CreateTableInput
 		attributeDefinitions []*dynamodb.AttributeDefinition
@@ -169,6 +169,275 @@ func createtable(router *gin.Engine) {
 }
 
 /*
+aws dynamodb create-table \
+    --table-name GameScores \
+    --attribute-definitions AttributeName=UserId,AttributeType=S AttributeName=GameTitle,AttributeType=S AttributeName=TopScore,AttributeType=N \
+    --key-schema AttributeName=UserId,KeyType=HASH \
+                AttributeName=GameTitle,KeyType=RANGE \
+    --provisioned-throughput ReadCapacityUnits=10,WriteCapacityUnits=5 \
+    --global-secondary-indexes \
+        "[
+            {
+                \"IndexName\": \"GameTitleIndex\",
+                \"KeySchema\": [
+                    {\"AttributeName\":\"GameTitle\",\"KeyType\":\"HASH\"},
+                    {\"AttributeName\":\"TopScore\",\"KeyType\":\"RANGE\"}
+                ],
+                \"Projection\": {
+                    \"ProjectionType\":\"INCLUDE\",
+                    \"NonKeyAttributes\":[\"UserId\"]
+                },
+                \"ProvisionedThroughput\": {
+                    \"ReadCapacityUnits\": 10,
+                    \"WriteCapacityUnits\": 5
+                }
+            }
+        ]"
+    --endpoint-url http://localhost:8000
+*/
+func createTableTest2(router *gin.Engine) {
+	fmt.Println("start test 'createTableTest2':")
+	var (
+		input                    *dynamodb.CreateTableInput
+		attributeDefinitions     []*dynamodb.AttributeDefinition
+		keySchema                []*dynamodb.KeySchemaElement
+		globalSecondaryIndex     []*dynamodb.GlobalSecondaryIndex
+		provisionedThroughput    dynamodb.ProvisionedThroughput
+		tableName                string
+		projectionType, typeName string
+		nonKeyAttributes         []*string
+	)
+	projectionType = "INCLUDE"
+	typeName = "UserId"
+	tableName = "Music"
+	nonKeyAttributes = append(nonKeyAttributes, &typeName)
+	attributeDefinitions = []*dynamodb.AttributeDefinition{
+		{
+			AttributeName: aws.String("UserId"),
+			AttributeType: aws.String("S"),
+		},
+		{
+			AttributeName: aws.String("GameTitle"),
+			AttributeType: aws.String("S"),
+		},
+		{
+			AttributeName: aws.String("TopScore"),
+			AttributeType: aws.String("N"),
+		},
+	}
+	keySchema = []*dynamodb.KeySchemaElement{
+		{
+			AttributeName: aws.String("UserId"),
+			KeyType:       aws.String("HASH"),
+		},
+		{
+			AttributeName: aws.String("GameTitle"),
+			KeyType:       aws.String("RANGE"),
+		},
+	}
+	provisionedThroughput = dynamodb.ProvisionedThroughput{
+		ReadCapacityUnits:  aws.Int64(10),
+		WriteCapacityUnits: aws.Int64(5),
+	}
+	nameIndex := "GameTitleIndex"
+	globalSecondaryIndex = []*dynamodb.GlobalSecondaryIndex{
+		{
+			IndexName: &nameIndex,
+			KeySchema: []*dynamodb.KeySchemaElement{
+				{
+					AttributeName: aws.String("GameTitle"),
+					KeyType:       aws.String("HASH"),
+				},
+				{
+					AttributeName: aws.String("TopScore"),
+					KeyType:       aws.String("RANGE"),
+				},
+			},
+			Projection: &dynamodb.Projection{
+				NonKeyAttributes: nonKeyAttributes,
+				ProjectionType:   &projectionType,
+			},
+			ProvisionedThroughput: &dynamodb.ProvisionedThroughput{
+				ReadCapacityUnits:  aws.Int64(10),
+				WriteCapacityUnits: aws.Int64(5),
+			},
+		},
+	}
+	localSecondaryIndex := []*dynamodb.LocalSecondaryIndex{
+		{
+			IndexName: aws.String("LocalSecondaryIndex"),
+			KeySchema: []*dynamodb.KeySchemaElement{
+				{
+					AttributeName: aws.String("UserId"),
+					KeyType:       aws.String("HASH"),
+				},
+				{
+					AttributeName: aws.String("TopScore"),
+					KeyType:       aws.String("RANGE"),
+				},
+			},
+			Projection: &dynamodb.Projection{
+				NonKeyAttributes: nonKeyAttributes,
+				ProjectionType:   &projectionType,
+			},
+		},
+	}
+	//tableClass = aws.String("STANDARD")
+	input = &dynamodb.CreateTableInput{
+		AttributeDefinitions: attributeDefinitions,
+		//BillingMode:            billingMode,
+		GlobalSecondaryIndexes: globalSecondaryIndex,
+		KeySchema:              keySchema,
+		LocalSecondaryIndexes:  localSecondaryIndex,
+		ProvisionedThroughput:  &provisionedThroughput,
+		//TableClass:             tableClass,
+		TableName: &tableName,
+	}
+
+	// ===== test dynamodb on tikv =====
+	sti := utils.GetTestConnection()
+	testCreateTableOutupt, err := sti.CreateTable(input)
+	if err != nil {
+		panic(err)
+	}
+	log.Info(context.TODO(), testCreateTableOutupt)
+	log.Info(context.TODO(), "The server create table test is finished")
+
+	//  ===== test local dynamodb =====
+	svc := utils.GetLocalConnection()
+	localCreateTableOutput, err := svc.CreateTable(input)
+	if err != nil {
+		panic(err)
+	}
+	log.Info(context.TODO(), localCreateTableOutput)
+	log.Info(context.TODO(), "The local create table test is finished")
+
+	judge.CreateTable(*localCreateTableOutput, *testCreateTableOutupt)
+}
+
+func createTableTest3(router *gin.Engine) {
+	fmt.Println("start test 'createTableTest2':")
+	var (
+		input                    *dynamodb.CreateTableInput
+		attributeDefinitions     []*dynamodb.AttributeDefinition
+		keySchema                []*dynamodb.KeySchemaElement
+		globalSecondaryIndex     []*dynamodb.GlobalSecondaryIndex
+		provisionedThroughput    dynamodb.ProvisionedThroughput
+		tableName                string
+		projectionType, typeName string
+		nonKeyAttributes         []*string
+	)
+	projectionType = "INCLUDE"
+	typeName = "UserId"
+	tableName = "Music"
+	nonKeyAttributes = append(nonKeyAttributes, &typeName)
+	attributeDefinitions = []*dynamodb.AttributeDefinition{
+		{
+			AttributeName: aws.String("UserId"),
+			AttributeType: aws.String("S"),
+		},
+		{
+			AttributeName: aws.String("GameTitle"),
+			AttributeType: aws.String("S"),
+		},
+		{
+			AttributeName: aws.String("TopScore"),
+			AttributeType: aws.String("N"),
+		},
+	}
+	keySchema = []*dynamodb.KeySchemaElement{
+		{
+			AttributeName: aws.String("UserId"),
+			KeyType:       aws.String("HASH"),
+		},
+		{
+			AttributeName: aws.String("GameTitle"),
+			KeyType:       aws.String("RANGE"),
+		},
+	}
+	provisionedThroughput = dynamodb.ProvisionedThroughput{
+		ReadCapacityUnits:  aws.Int64(10),
+		WriteCapacityUnits: aws.Int64(5),
+	}
+	nameIndex := "GameTitleIndex"
+	globalSecondaryIndex = []*dynamodb.GlobalSecondaryIndex{
+		{
+			IndexName: &nameIndex,
+			KeySchema: []*dynamodb.KeySchemaElement{
+				{
+					AttributeName: aws.String("GameTitle"),
+					KeyType:       aws.String("HASH"),
+				},
+				{
+					AttributeName: aws.String("TopScore"),
+					KeyType:       aws.String("RANGE"),
+				},
+			},
+			Projection: &dynamodb.Projection{
+				NonKeyAttributes: nonKeyAttributes,
+				ProjectionType:   &projectionType,
+			},
+			ProvisionedThroughput: &dynamodb.ProvisionedThroughput{
+				ReadCapacityUnits:  aws.Int64(10),
+				WriteCapacityUnits: aws.Int64(5),
+			},
+		},
+		{
+			IndexName: aws.String("SecondaryIndex"),
+			KeySchema: []*dynamodb.KeySchemaElement{
+				{
+					AttributeName: aws.String("UserId"),
+					KeyType:       aws.String("HASH"),
+				},
+				{
+					AttributeName: aws.String("TopScore"),
+					KeyType:       aws.String("RANGE"),
+				},
+			},
+			Projection: &dynamodb.Projection{
+				NonKeyAttributes: nonKeyAttributes,
+				ProjectionType:   &projectionType,
+			},
+			ProvisionedThroughput: &dynamodb.ProvisionedThroughput{
+				ReadCapacityUnits:  aws.Int64(5),
+				WriteCapacityUnits: aws.Int64(5),
+			},
+		},
+	}
+	//tableClass = aws.String("STANDARD")
+	input = &dynamodb.CreateTableInput{
+		AttributeDefinitions: attributeDefinitions,
+		//BillingMode:            billingMode,
+		GlobalSecondaryIndexes: globalSecondaryIndex,
+		KeySchema:              keySchema,
+		//LocalSecondaryIndexes:  localSecondaryIndex,
+		ProvisionedThroughput: &provisionedThroughput,
+		//TableClass:             tableClass,
+		TableName: &tableName,
+	}
+
+	// ===== test dynamodb on tikv =====
+	sti := utils.GetTestConnection()
+	testCreateTableOutupt, err := sti.CreateTable(input)
+	if err != nil {
+		panic(err)
+	}
+	log.Info(context.TODO(), testCreateTableOutupt)
+	log.Info(context.TODO(), "The server create table test is finished")
+
+	//  ===== test local dynamodb =====
+	svc := utils.GetLocalConnection()
+	localCreateTableOutput, err := svc.CreateTable(input)
+	if err != nil {
+		panic(err)
+	}
+	log.Info(context.TODO(), localCreateTableOutput)
+	log.Info(context.TODO(), "The local create table test is finished")
+
+	judge.CreateTable(*localCreateTableOutput, *testCreateTableOutupt)
+}
+
+/*
 aws dynamodb delete-table --table-name Music --endpoint-url http://localhost:8000
 
 	{
@@ -232,7 +501,7 @@ func deleteTable(router *gin.Engine) {
 	log.Info(context.TODO(), testDeleteTableOutput)
 	log.Info(context.TODO(), "The server delete table test is finished")
 
-	//  ===== test local dynamodb =====
+	// ===== test local dynamodb =====
 	svc := utils.GetLocalConnection()
 	localDeleteTableOutput, err := svc.DeleteTable(input)
 	if err != nil {
@@ -435,16 +704,16 @@ listTables(current data):
 func listTables(router *gin.Engine) {
 	fmt.Println("start test 'listTables':")
 	var (
-		input                   *dynamodb.ListTablesInput
-		exclusiveStartTableName string
-		limit                   int64
+		input *dynamodb.ListTablesInput
+		//exclusiveStartTableName string
+		//limit                   int64
 	)
 	// add the value
-	exclusiveStartTableName = "Music"
-	limit = 10
+	//exclusiveStartTableName = "Music"
+	//limit = 10
 	input = &dynamodb.ListTablesInput{
-		ExclusiveStartTableName: &exclusiveStartTableName,
-		Limit:                   &limit,
+		//ExclusiveStartTableName: &exclusiveStartTableName,
+		//Limit:                   &limit,
 	}
 
 	// ===== test dynamodb on tikv =====

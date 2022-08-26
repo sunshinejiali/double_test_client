@@ -3,8 +3,38 @@ package judge
 import (
 	"context"
 	"double_test_client/log"
+	"fmt"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
+	"sort"
 )
+
+type IndexG []dynamodb.GlobalSecondaryIndexDescription
+
+func (s IndexG) Len() int {
+	return len(s)
+}
+
+func (s IndexG) Less(i, j int) bool {
+	return *s[i].IndexName < *s[j].IndexName
+}
+
+func (s IndexG) Swap(i, j int) {
+	s[i], s[j] = s[j], s[i]
+}
+
+type IndexL []dynamodb.LocalSecondaryIndexDescription
+
+func (s IndexL) Len() int {
+	return len(s)
+}
+
+func (s IndexL) Less(i, j int) bool {
+	return *s[i].IndexName < *s[j].IndexName
+}
+
+func (s IndexL) Swap(i, j int) {
+	s[i], s[j] = s[j], s[i]
+}
 
 func CreateTable(localCreateTableOutput, testCreateTablesOutput dynamodb.CreateTableOutput) {
 	localDescributeTable := localCreateTableOutput.TableDescription
@@ -31,6 +61,20 @@ func CreateTable(localCreateTableOutput, testCreateTablesOutput dynamodb.CreateT
 
 	if (*localDescributeTable.ProvisionedThroughput.ReadCapacityUnits != *testDescributetable.ProvisionedThroughput.ReadCapacityUnits) || (*localDescributeTable.ProvisionedThroughput.WriteCapacityUnits != *localDescributeTable.ProvisionedThroughput.WriteCapacityUnits) {
 		panic("The size of ProvisionedThroughput is different.")
+	}
+
+	if localDescributeTable.GlobalSecondaryIndexes != nil {
+		if len(localDescributeTable.GlobalSecondaryIndexes) != len(testDescributetable.GlobalSecondaryIndexes) {
+			panic("The size of globalIndex is different.")
+		}
+		//judgeGlobal(localDescributeTable.GlobalSecondaryIndexes, testDescributetable.GlobalSecondaryIndexes)
+	}
+
+	if localDescributeTable.LocalSecondaryIndexes != nil {
+		if len(localDescributeTable.LocalSecondaryIndexes) != len(testDescributetable.LocalSecondaryIndexes) {
+			panic("The size of globalIndex is different.")
+		}
+		//judgeLocal(localDescributeTable.LocalSecondaryIndexes, testDescributetable.LocalSecondaryIndexes)
 	}
 
 	// other attributes:
@@ -69,6 +113,20 @@ func DeleteTable(localDeleteTableOutput, testDeleteTableOutput dynamodb.DeleteTa
 
 	if (*localDescributeTable.ProvisionedThroughput.ReadCapacityUnits != *testDescributetable.ProvisionedThroughput.ReadCapacityUnits) || (*localDescributeTable.ProvisionedThroughput.WriteCapacityUnits != *localDescributeTable.ProvisionedThroughput.WriteCapacityUnits) {
 		panic("The size of ProvisionedThroughput is different.")
+	}
+
+	if localDescributeTable.GlobalSecondaryIndexes != nil {
+		if len(localDescributeTable.GlobalSecondaryIndexes) != len(testDescributetable.GlobalSecondaryIndexes) {
+			panic("The size of globalIndex is different.")
+		}
+		//judgeGlobal(localDescributeTable.GlobalSecondaryIndexes, testDescributetable.GlobalSecondaryIndexes)
+	}
+
+	if localDescributeTable.LocalSecondaryIndexes != nil {
+		if len(localDescributeTable.LocalSecondaryIndexes) != len(testDescributetable.LocalSecondaryIndexes) {
+			panic("The size of globalIndex is different.")
+		}
+		//judgeLocal(localDescributeTable.LocalSecondaryIndexes, testDescributetable.LocalSecondaryIndexes)
 	}
 	// other attributes:
 	//if localDescributeTable.ItemCount != testDescributetable.ItemCount {
@@ -140,6 +198,20 @@ func DescribeTable(localDescribeTableOutput, testDescribeTableOutput dynamodb.De
 	if *localDescributeTable.ItemCount != *testDescributetable.ItemCount {
 		panic("judgeDescribeTable test is fail: ItemCount is different.")
 	}
+
+	if localDescributeTable.GlobalSecondaryIndexes != nil {
+		if len(localDescributeTable.GlobalSecondaryIndexes) != len(testDescributetable.GlobalSecondaryIndexes) {
+			panic("The size of globalIndex is different.")
+		}
+		//judgeGlobal(localDescributeTable.GlobalSecondaryIndexes, testDescributetable.GlobalSecondaryIndexes)
+	}
+
+	if localDescributeTable.LocalSecondaryIndexes != nil {
+		if len(localDescributeTable.LocalSecondaryIndexes) != len(testDescributetable.LocalSecondaryIndexes) {
+			panic("The size of globalIndex is different.")
+		}
+		//judgeLocal(localDescributeTable.LocalSecondaryIndexes, testDescributetable.LocalSecondaryIndexes)
+	}
 	// other attributes:
 	//if localDescributeTable.ItemCount != testDescributetable.ItemCount {
 	//	panic("judgeCreateTable test is fail: ItemCount is different.")
@@ -196,6 +268,108 @@ func judgeName(localName, testName *string) {
 	} else if localName == nil && testName == nil {
 
 	} else if *localName != *testName {
+		fmt.Println(*localName, *testName, "**************")
 		panic("Test is fail: TableName is different.")
+	}
+}
+
+func judgeGlobal(localDescribeTable, testDescribeTable []*dynamodb.GlobalSecondaryIndexDescription) {
+	des := make(IndexG, 0)
+	for _, v := range localDescribeTable {
+		x := dynamodb.GlobalSecondaryIndexDescription{
+			IndexArn:       v.IndexArn,
+			IndexName:      v.IndexName,
+			IndexSizeBytes: v.IndexSizeBytes,
+			ItemCount:      v.ItemCount,
+			KeySchema:      v.KeySchema,
+			Projection:     v.Projection,
+		}
+		des = append(des, x)
+	}
+	sort.Sort(des)
+	desL := make(IndexG, 0)
+	for _, v := range testDescribeTable {
+		x := dynamodb.GlobalSecondaryIndexDescription{
+			IndexArn:       v.IndexArn,
+			IndexName:      v.IndexName,
+			IndexSizeBytes: v.IndexSizeBytes,
+			ItemCount:      v.ItemCount,
+			KeySchema:      v.KeySchema,
+			Projection:     v.Projection,
+		}
+		desL = append(desL, x)
+	}
+	sort.Sort(desL)
+	for index, local := range localDescribeTable {
+		fmt.Println(index, *local.IndexStatus, *desL[index].IndexStatus)
+		judgeName(local.IndexName, desL[index].IndexName)
+		judgeSchema(local.KeySchema, desL[index].KeySchema)
+		if *local.IndexStatus != *desL[index].IndexStatus {
+			panic("judgeDescribeTable test is fail: IndexStatus is different.")
+		}
+		if local.ItemCount != desL[index].ItemCount {
+			panic("judgeDescribeTable test is fail: ItemCount is different.")
+		}
+		if *local.IndexArn != *desL[index].IndexArn {
+			panic("judgeCreateTable test is fail: IndexArn is different.")
+		}
+		if (*local.ProvisionedThroughput.ReadCapacityUnits != *desL[index].ProvisionedThroughput.ReadCapacityUnits) || (*local.ProvisionedThroughput.WriteCapacityUnits != *desL[index].ProvisionedThroughput.WriteCapacityUnits) {
+			panic("The size of ProvisionedThroughput is different.")
+		}
+		judgeProjection(local.Projection, desL[index].Projection)
+	}
+}
+
+func judgeLocal(localDescribeTable, testDescribeTable []*dynamodb.LocalSecondaryIndexDescription) {
+	des := make(IndexL, 0)
+	for _, v := range localDescribeTable {
+		x := dynamodb.LocalSecondaryIndexDescription{
+			IndexArn:       v.IndexArn,
+			IndexName:      v.IndexName,
+			IndexSizeBytes: v.IndexSizeBytes,
+			ItemCount:      v.ItemCount,
+			KeySchema:      v.KeySchema,
+			Projection:     v.Projection,
+		}
+		des = append(des, x)
+	}
+	sort.Sort(des)
+	desL := make(IndexL, 0)
+	for _, v := range testDescribeTable {
+		x := dynamodb.LocalSecondaryIndexDescription{
+			IndexArn:       v.IndexArn,
+			IndexName:      v.IndexName,
+			IndexSizeBytes: v.IndexSizeBytes,
+			ItemCount:      v.ItemCount,
+			KeySchema:      v.KeySchema,
+			Projection:     v.Projection,
+		}
+		desL = append(desL, x)
+	}
+	sort.Sort(desL)
+	for index, local := range localDescribeTable {
+		judgeName(local.IndexName, desL[index].IndexName)
+		judgeSchema(local.KeySchema, desL[index].KeySchema)
+		if *local.ItemCount != *desL[index].ItemCount {
+			panic("judgeDescribeTable test is fail: ItemCount is different.")
+		}
+		if *local.IndexArn != *desL[index].IndexArn {
+			panic("judgeCreateTable test is fail: IndexArn is different.")
+		}
+		judgeProjection(local.Projection, desL[index].Projection)
+	}
+}
+
+func judgeProjection(local, test *dynamodb.Projection) {
+	if *local.ProjectionType != *test.ProjectionType {
+		panic("The size of Projection is different.")
+	}
+	if len(local.NonKeyAttributes) != len(test.NonKeyAttributes) {
+		panic("The size of Projection is different.")
+	}
+	for index, name := range local.NonKeyAttributes {
+		if *name != *test.NonKeyAttributes[index] {
+			panic("The name of Projection is different.")
+		}
 	}
 }

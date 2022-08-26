@@ -333,7 +333,7 @@ func deleteItem(router *gin.Engine) {
 	}
 
 	log.Info(context.TODO(), testDeleteItemOutput)
-	log.Info(context.TODO(), "The server put item test is finished")
+	log.Info(context.TODO(), "The server delete item test is finished")
 
 	//  ===== test local dynamodb =====
 	svc := utils.GetLocalConnection()
@@ -343,7 +343,7 @@ func deleteItem(router *gin.Engine) {
 	}
 
 	log.Info(context.TODO(), localDeleteItemOutput)
-	log.Info(context.TODO(), "The local put item test is finished")
+	log.Info(context.TODO(), "The local delete item test is finished")
 
 	judge.DeleteItem(*localDeleteItemOutput, *testDeleteItemOutput)
 }

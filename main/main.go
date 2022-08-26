@@ -9,34 +9,38 @@ func main() {
 
 	listTables(router)
 
-	createtable(router)
+	deleteTable(router)
+
+	listTables(router)
+
+	createTableTest2(router)
 
 	listTables(router)
 
 	describeTable(router)
 
 	listTables(router)
-
-	updateTable(router)
-
-	//  ====== item =====
-	putItem(router)
-
-	getItem(router)
-
-	deleteItem(router)
-
-	putItem(router)
-
-	updateItem(router)
-
-	//  ====== index =====
-	//query(router)
-	scan(router)
-	deleteTable(router)
+	//
+	//updateTable(router)
+	//
+	//////  ====== item =====
+	//putItem(router)
+	////
+	//getItem(router)
+	////
+	//deleteItem(router)
+	////
+	//putItem(router)
+	////
+	//updateItem(router)
+	////
+	//////  ====== index =====
+	////query(router)
+	//scan(router)
+	//deleteTable(router)
 
 	//batchWriteItem(router)
-
+	//
 	//batchGetItem(router)
 
 }

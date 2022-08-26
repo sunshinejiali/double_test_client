@@ -1,6 +1,8 @@
 package utils
 
-import "github.com/aws/aws-sdk-go/service/dynamodb"
+import (
+	"github.com/aws/aws-sdk-go/service/dynamodb"
+)
 
 func Change(t *dynamodb.AttributeValue) string {
 	// handle t type

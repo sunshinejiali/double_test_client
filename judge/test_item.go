@@ -94,7 +94,7 @@ func DeleteItem(localDeleteItemOutput, testDeleteItemOutput dynamodb.DeleteItemO
 	//if *localDeleteItemOutput.ConsumedCapacity.TableName != *testDeleteItemOutput.ConsumedCapacity.TableName {
 	//	panic("The tableName is different.")
 	//}
-	log.Info(context.TODO(), "updateItem is successful!")
+	log.Info(context.TODO(), "deleteItem is successful!")
 }
 
 /*
