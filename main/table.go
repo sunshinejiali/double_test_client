@@ -604,6 +604,241 @@ func updateTable(router *gin.Engine) {
 	judge.UpdateTable(*localUpdateTableOutput, *testUpdateTableOutput)
 }
 
+func updateTable2(router *gin.Engine) {
+	fmt.Println("start test 'updateTable':")
+	var (
+		input                 *dynamodb.UpdateTableInput
+		tableName             string
+		provisionedThroughput dynamodb.ProvisionedThroughput
+		//attributeDefinitions []*dynamodb.AttributeDefinition
+		//billingMode           string
+		//tableClass            string
+		//ReplicaUpdates       []*ReplicationGroupUpdate
+	)
+	tableName = "Music"
+	typeName := "UserId"
+	projectionType := "INCLUDE"
+	var nonKeyAttributes []*string
+	nonKeyAttributes = append(nonKeyAttributes, &typeName)
+	globalSecondaryIndexUpdates := make([]*dynamodb.GlobalSecondaryIndexUpdate, 0)
+	global := &dynamodb.GlobalSecondaryIndexUpdate{
+		Create: &dynamodb.CreateGlobalSecondaryIndexAction{
+			IndexName: aws.String("SecondaryIndex"),
+			KeySchema: []*dynamodb.KeySchemaElement{
+				{
+					AttributeName: aws.String("UserId"),
+					KeyType:       aws.String("HASH"),
+				},
+				{
+					AttributeName: aws.String("TopScore"),
+					KeyType:       aws.String("RANGE"),
+				},
+			},
+			Projection: &dynamodb.Projection{
+				NonKeyAttributes: nonKeyAttributes,
+				ProjectionType:   &projectionType,
+			},
+			ProvisionedThroughput: &dynamodb.ProvisionedThroughput{
+				ReadCapacityUnits:  aws.Int64(5),
+				WriteCapacityUnits: aws.Int64(5),
+			},
+		},
+		Delete: nil,
+		Update: nil,
+	}
+	globalSecondaryIndexUpdates = append(globalSecondaryIndexUpdates, global)
+
+	// add the value
+	provisionedThroughput = dynamodb.ProvisionedThroughput{
+		ReadCapacityUnits:  aws.Int64(5),
+		WriteCapacityUnits: aws.Int64(5),
+	}
+	// TODO: update all values
+	input = &dynamodb.UpdateTableInput{
+		TableName: &tableName,
+		AttributeDefinitions: []*dynamodb.AttributeDefinition{
+			{
+				AttributeName: aws.String("UserId"),
+				AttributeType: aws.String("S"),
+			},
+			{
+				AttributeName: aws.String("GameTitle"),
+				AttributeType: aws.String("S"),
+			},
+			{
+				AttributeName: aws.String("TopScore"),
+				AttributeType: aws.String("N"),
+			},
+		},
+		ProvisionedThroughput:       &provisionedThroughput,
+		GlobalSecondaryIndexUpdates: globalSecondaryIndexUpdates,
+	}
+
+	// ===== test dynamodb on tikv =====
+	sti := utils.GetTestConnection()
+	testUpdateTableOutput, err := sti.UpdateTable(input)
+	if err != nil {
+		panic(err)
+	}
+
+	log.Info(context.TODO(), testUpdateTableOutput)
+	log.Info(context.TODO(), "The server update table test is finished")
+
+	//  ===== test local dynamodb =====
+	svc := utils.GetLocalConnection()
+	localUpdateTableOutput, err := svc.UpdateTable(input)
+	if err != nil {
+		panic(err)
+	}
+
+	log.Info(context.TODO(), localUpdateTableOutput)
+	log.Info(context.TODO(), "The local update table test is finished")
+
+	judge.UpdateTable(*localUpdateTableOutput, *testUpdateTableOutput)
+}
+
+func updateTable3(router *gin.Engine) {
+	fmt.Println("start test 'updateTable':")
+	var (
+		input                 *dynamodb.UpdateTableInput
+		tableName             string
+		provisionedThroughput dynamodb.ProvisionedThroughput
+		//attributeDefinitions []*dynamodb.AttributeDefinition
+		//billingMode           string
+		//tableClass            string
+		//ReplicaUpdates       []*ReplicationGroupUpdate
+	)
+	tableName = "Music"
+	globalSecondaryIndexUpdates := make([]*dynamodb.GlobalSecondaryIndexUpdate, 0)
+	global := &dynamodb.GlobalSecondaryIndexUpdate{
+		Create: nil,
+		Delete: nil,
+		Update: &dynamodb.UpdateGlobalSecondaryIndexAction{
+			IndexName: aws.String("SecondaryIndex"),
+			ProvisionedThroughput: &dynamodb.ProvisionedThroughput{
+				ReadCapacityUnits:  aws.Int64(5),
+				WriteCapacityUnits: aws.Int64(10),
+			},
+		},
+	}
+	globalSecondaryIndexUpdates = append(globalSecondaryIndexUpdates, global)
+
+	// add the value
+	provisionedThroughput = dynamodb.ProvisionedThroughput{
+		ReadCapacityUnits:  aws.Int64(5),
+		WriteCapacityUnits: aws.Int64(5),
+	}
+	// TODO: update all values
+	input = &dynamodb.UpdateTableInput{
+		TableName: &tableName,
+		AttributeDefinitions: []*dynamodb.AttributeDefinition{
+			{
+				AttributeName: aws.String("UserId"),
+				AttributeType: aws.String("S"),
+			},
+			{
+				AttributeName: aws.String("GameTitle"),
+				AttributeType: aws.String("S"),
+			},
+			{
+				AttributeName: aws.String("TopScore"),
+				AttributeType: aws.String("N"),
+			},
+		},
+		ProvisionedThroughput:       &provisionedThroughput,
+		GlobalSecondaryIndexUpdates: globalSecondaryIndexUpdates,
+	}
+
+	// ===== test dynamodb on tikv =====
+	sti := utils.GetTestConnection()
+	testUpdateTableOutput, err := sti.UpdateTable(input)
+	if err != nil {
+		panic(err)
+	}
+
+	log.Info(context.TODO(), testUpdateTableOutput)
+	log.Info(context.TODO(), "The server update table test is finished")
+
+	//  ===== test local dynamodb =====
+	svc := utils.GetLocalConnection()
+	localUpdateTableOutput, err := svc.UpdateTable(input)
+	if err != nil {
+		panic(err)
+	}
+
+	log.Info(context.TODO(), localUpdateTableOutput)
+	log.Info(context.TODO(), "The local update table test is finished")
+
+	judge.UpdateTable(*localUpdateTableOutput, *testUpdateTableOutput)
+}
+
+func updateTable4(router *gin.Engine) {
+	fmt.Println("start test 'updateTable4':")
+	var (
+		input                 *dynamodb.UpdateTableInput
+		tableName             string
+		provisionedThroughput dynamodb.ProvisionedThroughput
+	)
+	tableName = "Music"
+	globalSecondaryIndexUpdates := make([]*dynamodb.GlobalSecondaryIndexUpdate, 0)
+	global := &dynamodb.GlobalSecondaryIndexUpdate{
+		Create: nil,
+		Delete: &dynamodb.DeleteGlobalSecondaryIndexAction{
+			IndexName: aws.String("SecondaryIndex"),
+		},
+		Update: nil,
+	}
+	globalSecondaryIndexUpdates = append(globalSecondaryIndexUpdates, global)
+
+	// add the value
+	provisionedThroughput = dynamodb.ProvisionedThroughput{
+		ReadCapacityUnits:  aws.Int64(5),
+		WriteCapacityUnits: aws.Int64(5),
+	}
+	// TODO: update all values
+	input = &dynamodb.UpdateTableInput{
+		TableName: &tableName,
+		AttributeDefinitions: []*dynamodb.AttributeDefinition{
+			{
+				AttributeName: aws.String("UserId"),
+				AttributeType: aws.String("S"),
+			},
+			{
+				AttributeName: aws.String("GameTitle"),
+				AttributeType: aws.String("S"),
+			},
+			{
+				AttributeName: aws.String("TopScore"),
+				AttributeType: aws.String("N"),
+			},
+		},
+		ProvisionedThroughput:       &provisionedThroughput,
+		GlobalSecondaryIndexUpdates: globalSecondaryIndexUpdates,
+	}
+
+	// ===== test dynamodb on tikv =====
+	sti := utils.GetTestConnection()
+	testUpdateTableOutput, err := sti.UpdateTable(input)
+	if err != nil {
+		panic(err)
+	}
+
+	log.Info(context.TODO(), testUpdateTableOutput)
+	log.Info(context.TODO(), "The server update table test is finished")
+
+	//  ===== test local dynamodb =====
+	svc := utils.GetLocalConnection()
+	localUpdateTableOutput, err := svc.UpdateTable(input)
+	if err != nil {
+		panic(err)
+	}
+
+	log.Info(context.TODO(), localUpdateTableOutput)
+	log.Info(context.TODO(), "The local update table test is finished")
+
+	judge.UpdateTable(*localUpdateTableOutput, *testUpdateTableOutput)
+}
+
 /*
 aws dynamodb describe-table --table-name Person --endpoint-url http://localhost:8000
 

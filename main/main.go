@@ -7,22 +7,26 @@ import (
 func main() {
 	router := gin.Default()
 
-	listTables(router)
-
-	deleteTable(router)
+	//deleteTable(router)
 
 	listTables(router)
 
-	createTableTest2(router)
+	listTables(router)
+
+	createTableTest3(router)
 
 	listTables(router)
 
 	describeTable(router)
 
+	//updateTable(router)
+	updateTable4(router)
+
+	describeTable(router)
+
 	listTables(router)
 	//
-	//updateTable(router)
-	//
+	deleteTable(router)
 	//////  ====== item =====
 	//putItem(router)
 	////
