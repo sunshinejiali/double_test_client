@@ -141,6 +141,58 @@ func getItem(router *gin.Engine) {
 	judge.GetItem(*localGetItemOutput, *testGetItemOutput)
 }
 
+func getItem2(router *gin.Engine) {
+	fmt.Println("start test 'getItem':")
+	var (
+		input *dynamodb.GetItemInput
+		//attributesToGet          []*string
+		//consistentRead           bool
+		//expressionAttributeNames map[string]*string
+		key map[string]*dynamodb.AttributeValue
+		//projectionExpression     string
+		//returnConsumedCapacity   string
+		tableName string
+		userId    string
+		gameTitle string
+	)
+	// TODO: add all values
+	key = make(map[string]*dynamodb.AttributeValue, 0)
+	tableName = "Music"
+	userId = "10"
+	gameTitle = "Happy Day"
+	key["UserId"] = &dynamodb.AttributeValue{
+		S: &userId,
+	}
+	key["GameTitle"] = &dynamodb.AttributeValue{
+		S: &gameTitle,
+	}
+	input = &dynamodb.GetItemInput{
+		TableName: &tableName,
+		Key:       key,
+	}
+
+	// ===== test dynamodb on tikv =====
+	sti := utils.GetTestConnection()
+	testGetItemOutput, err := sti.GetItem(input)
+	if err != nil {
+		panic(err)
+	}
+
+	log.Info(context.TODO(), testGetItemOutput)
+	log.Info(context.TODO(), "The server get item test is finished")
+
+	//  ===== test local dynamodb =====
+	svc := utils.GetLocalConnection()
+	localGetItemOutput, err := svc.GetItem(input)
+	if err != nil {
+		panic(err)
+	}
+	log.Info(context.TODO(), localGetItemOutput)
+	log.Info(context.TODO(), "The local get item test is finished")
+
+	judge.GetItem(*localGetItemOutput, *testGetItemOutput)
+}
+
 func putItem(router *gin.Engine) {
 	fmt.Println("start test 'putItem':")
 	var (
@@ -154,11 +206,11 @@ func putItem(router *gin.Engine) {
 		//returnConsumedCapacity      string
 		//returnItemCollectionMetrics string
 		//returnValues                string
-		tableName  string
-		artist     string
-		songTitle  string
-		albumTitle string
-		awards     string
+		tableName string
+		artist    string
+		songTitle string
+		//albumTitle string
+		//awards     string
 	)
 	item = make(map[string]*dynamodb.AttributeValue, 0)
 
@@ -166,20 +218,92 @@ func putItem(router *gin.Engine) {
 	tableName = "Music"
 	artist = "Acme Band"
 	songTitle = "Happy Day"
-	albumTitle = "Songs About Life"
-	awards = "10"
+	//albumTitle = "Songs About Life"
+	//awards = "10"
 	item["Artist"] = &dynamodb.AttributeValue{
 		S: &artist,
 	}
 	item["SongTitle"] = &dynamodb.AttributeValue{
 		S: &songTitle,
 	}
-	item["AlbumTitle"] = &dynamodb.AttributeValue{
-		S: &albumTitle,
+	//item["AlbumTitle"] = &dynamodb.AttributeValue{
+	//	S: &albumTitle,
+	//}
+	//item["Awards"] = &dynamodb.AttributeValue{
+	//	N: &awards,
+	//}
+	input = &dynamodb.PutItemInput{
+		//ConditionExpression:         nil,
+		//ConditionalOperator:         nil,
+		//Expected:                    nil,
+		//ExpressionAttributeNames:    nil,
+		//ExpressionAttributeValues:   nil,
+		Item: item,
+		//ReturnConsumedCapacity:      &returnConsumedCapacity,
+		//ReturnItemCollectionMetrics: &returnItemCollectionMetrics,
+		//ReturnValues:                &returnValues,
+		TableName: &tableName,
 	}
-	item["Awards"] = &dynamodb.AttributeValue{
-		N: &awards,
+
+	// ===== test dynamodb on tikv =====
+	sti := utils.GetTestConnection()
+	testPutItemOutput, err := sti.PutItem(input)
+	if err != nil {
+		panic(err)
 	}
+
+	log.Info(context.TODO(), testPutItemOutput)
+	log.Info(context.TODO(), "The server put item test is finished")
+
+	//  ===== test local dynamodb =====
+	svc := utils.GetLocalConnection()
+	localPutItemOutput, err := svc.PutItem(input)
+	if err != nil {
+		panic(err)
+	}
+
+	log.Info(context.TODO(), localPutItemOutput)
+	log.Info(context.TODO(), "The local put item test is finished")
+
+	judge.PutItem(*localPutItemOutput, *testPutItemOutput)
+}
+
+func putItem2(router *gin.Engine) {
+	fmt.Println("start test 'putItem2':")
+	var (
+		input *dynamodb.PutItemInput
+		//ConditionExpression         string
+		//ConditionalOperator         string
+		//Expected                    map[string]*ExpectedAttributeValue
+		//ExpressionAttributeNames    map[string]*string
+		//ExpressionAttributeValues   map[string]*AttributeValue
+		item map[string]*dynamodb.AttributeValue
+		//returnConsumedCapacity      string
+		//returnItemCollectionMetrics string
+		//returnValues                string
+		tableName string
+		userId    string
+		topScore  string
+		gameTitle string
+	)
+	item = make(map[string]*dynamodb.AttributeValue, 0)
+
+	// TODO: add all values
+	tableName = "Music"
+	userId = "10"
+	gameTitle = "Happy Day"
+	topScore = "123"
+
+	item["GameTitle"] = &dynamodb.AttributeValue{
+		S: &gameTitle,
+	}
+	item["UserId"] = &dynamodb.AttributeValue{
+		S: &userId,
+	}
+	item["TopScore"] = &dynamodb.AttributeValue{
+		N: &topScore,
+	}
+
 	input = &dynamodb.PutItemInput{
 		//ConditionExpression:         nil,
 		//ConditionalOperator:         nil,
@@ -293,24 +417,101 @@ func updateItem(router *gin.Engine) {
 	judge.UpdateItem(*localUpdateItemOutput, *testUpdateItemOutput)
 }
 
+func updateItem2(router *gin.Engine) {
+	fmt.Println("start test 'updateItem2':")
+	var (
+		input *dynamodb.UpdateItemInput
+		//attributeUpdates            map[string]*AttributeValueUpdate
+		//conditionExpression         *string
+		//conditionalOperator         *string
+		//expected                    map[string]*ExpectedAttributeValue
+		//expressionAttributeNames  map[string]*string
+		expressionAttributeValues map[string]*dynamodb.AttributeValue
+		key                       map[string]*dynamodb.AttributeValue
+		//returnConsumedCapacity      *string
+		//returnItemCollectionMetrics *string
+		returnValues     string
+		tableName        string
+		updateExpression string
+		userId           string
+		gameTitle        string
+		topScore         string
+	)
+
+	key = make(map[string]*dynamodb.AttributeValue, 0)
+	expressionAttributeValues = make(map[string]*dynamodb.AttributeValue, 0)
+	tableName = "Music"
+	userId = "10"
+	gameTitle = "Happy Day"
+	topScore = "110001"
+	returnValues = "UPDATED_NEW"
+	key["UserId"] = &dynamodb.AttributeValue{
+		S: &userId,
+	}
+	key["GameTitle"] = &dynamodb.AttributeValue{
+		S: &gameTitle,
+	}
+
+	expressionAttributeValues[":TopScore"] = &dynamodb.AttributeValue{
+		S: &topScore,
+	}
+	updateExpression = "set TopScore = :TopScore"
+	input = &dynamodb.UpdateItemInput{
+		//AttributeUpdates:            nil,
+		//ConditionExpression:         nil,
+		//ConditionalOperator:         nil,
+		//Expected:                    nil,
+		ExpressionAttributeNames:  nil,
+		ExpressionAttributeValues: expressionAttributeValues,
+		Key:                       key,
+		//ReturnConsumedCapacity:      nil,
+		//ReturnItemCollectionMetrics: nil,
+		ReturnValues:     &returnValues,
+		TableName:        &tableName,
+		UpdateExpression: &updateExpression,
+	}
+
+	//  ===== test local dynamodb =====
+	svc := utils.GetLocalConnection()
+	localUpdateItemOutput, err := svc.UpdateItem(input)
+	if err != nil {
+		panic(err)
+	}
+
+	log.Info(context.TODO(), localUpdateItemOutput)
+	log.Info(context.TODO(), "The local update item test is finished")
+
+	// ===== test dynamodb on tikv =====
+	sti := utils.GetTestConnection()
+	testUpdateItemOutput, err := sti.UpdateItem(input)
+	if err != nil {
+		panic(err)
+	}
+
+	log.Info(context.TODO(), testUpdateItemOutput)
+	log.Info(context.TODO(), "The server update item test is finished")
+
+	judge.UpdateItem(*localUpdateItemOutput, *testUpdateItemOutput)
+}
+
 func deleteItem(router *gin.Engine) {
 	fmt.Println("start test 'deleteItem':")
 	var (
 		input                        *dynamodb.DeleteItemInput
 		key                          map[string]*dynamodb.AttributeValue
-		tableName, artist, songTitle string
+		tableName, userId, gameTitle string
 	)
 	key = make(map[string]*dynamodb.AttributeValue, 0)
 
 	// TODO: add all values
 	tableName = "Music"
-	artist = "Acme Band"
-	songTitle = "Happy Day"
-	key["SongTitle"] = &dynamodb.AttributeValue{
-		S: &songTitle,
+	userId = "10"
+	gameTitle = "Happy Day"
+	key["UserId"] = &dynamodb.AttributeValue{
+		S: &userId,
 	}
-	key["Artist"] = &dynamodb.AttributeValue{
-		S: &artist,
+	key["GameTitle"] = &dynamodb.AttributeValue{
+		S: &gameTitle,
 	}
 	input = &dynamodb.DeleteItemInput{
 		//ConditionExpression:         nil,

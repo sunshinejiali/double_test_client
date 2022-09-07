@@ -178,7 +178,7 @@ func DescribeTable(localDescribeTableOutput, testDescribeTableOutput dynamodb.De
 
 	if localDescributeTable.GlobalSecondaryIndexes != nil {
 		if len(localDescributeTable.GlobalSecondaryIndexes) != len(testDescributetable.GlobalSecondaryIndexes) {
-			//log.Info(context.TODO(), localDescributeTable.GlobalSecondaryIndexes, testDescributetable.GlobalSecondaryIndexes)
+			log.Info(context.TODO(), localDescributeTable.GlobalSecondaryIndexes, testDescributetable.GlobalSecondaryIndexes)
 			panic("The size of globalIndex is different.")
 		}
 		judgeGlobal(localDescributeTable.GlobalSecondaryIndexes, testDescributetable.GlobalSecondaryIndexes)
@@ -222,10 +222,18 @@ func judgeAttribute(local, test []*dynamodb.AttributeDefinition) {
 	if len(local) != len(test) {
 		panic("The size of AttributeDefinitions is different.")
 	}
-	for key, name := range local {
-		if (*name.AttributeName != *test[key].AttributeName) || (*name.AttributeType != *test[key].AttributeType) {
-			panic("The AttributeDefinitions is different.")
+	count := 0
+	for _, v := range local {
+		for _, t := range test {
+			if (*v.AttributeName == *t.AttributeName) && (*v.AttributeType == *t.AttributeType) {
+				count++
+				break
+			}
 		}
+	}
+	if count != len(local) {
+		fmt.Println(count, "****", len(local))
+		panic("AttributeDefinition is different!")
 	}
 }
 

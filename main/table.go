@@ -798,20 +798,20 @@ func updateTable4(router *gin.Engine) {
 	// TODO: update all values
 	input = &dynamodb.UpdateTableInput{
 		TableName: &tableName,
-		AttributeDefinitions: []*dynamodb.AttributeDefinition{
-			{
-				AttributeName: aws.String("UserId"),
-				AttributeType: aws.String("S"),
-			},
-			{
-				AttributeName: aws.String("GameTitle"),
-				AttributeType: aws.String("S"),
-			},
-			{
-				AttributeName: aws.String("TopScore"),
-				AttributeType: aws.String("N"),
-			},
-		},
+		//AttributeDefinitions: []*dynamodb.AttributeDefinition{
+		//	{
+		//		AttributeName: aws.String("UserId"),
+		//		AttributeType: aws.String("S"),
+		//	},
+		//	{
+		//		AttributeName: aws.String("GameTitle"),
+		//		AttributeType: aws.String("S"),
+		//	},
+		//	{
+		//		AttributeName: aws.String("TopScore"),
+		//		AttributeType: aws.String("N"),
+		//	},
+		//},
 		ProvisionedThroughput:       &provisionedThroughput,
 		GlobalSecondaryIndexUpdates: globalSecondaryIndexUpdates,
 	}

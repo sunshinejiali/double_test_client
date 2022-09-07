@@ -28,7 +28,7 @@ func Query(localQueryOutput, testQueryOutput dynamodb.QueryOutput) {
 			panic("The size of item is different.")
 		}
 		for key, value := range localMap {
-			if value != testMap[key] {
+			if utils.Change(value) != utils.Change(testMap[key]) {
 				panic("The value is different.")
 			}
 		}
